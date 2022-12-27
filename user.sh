@@ -9,3 +9,9 @@ unzip -o /tmp/user.zip
 mv user-main user
 cd /home/roboshop/user
 npm install
+
+sed -i -e 's/REDIS_ENDPOINT/redis.devopsb69.online/' -e 's/MONGO_ENDPOINT/redis.devopsb69.online/' systemd.service
+mv /home/roboshop/user/systemd.service /etc/systemd/system/user.service
+systemctl daemon-reload
+systemctl restart user
+systemctl enable user
