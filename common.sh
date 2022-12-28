@@ -57,7 +57,7 @@ NODEJS() {
   STAT $?
 
   PRINT "Setup SystemD Properties"
-  mv /home/roboshop/cart/systemd.service /etc/systemd/system/cart.service
+  mv /home/roboshop/${COMPONENT}/systemd.service /etc/systemd/system/${COMPONENT}.service
   STAT $?
 
   PRINT "Reload SustemD"
