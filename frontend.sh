@@ -1,4 +1,4 @@
-COMPOMENT=frontend
+COMPONENT=frontend
 CONTENT="*"
 source common.sh
 
