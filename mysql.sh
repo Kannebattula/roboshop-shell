@@ -3,7 +3,7 @@ if [ -z "$1" ]; then
   exit
 fi
 
-COMPONENT=cart
+COMPONENT=mysql
 source common.sh
 ROBOSHOP_MYSQL_PASSWORD=$1
 
@@ -34,3 +34,20 @@ then
   DEFAULT_PASSWORD=$(grep 'A temporary password' /var/log/mysqld.log | awk '{print $NF}')
   cat /tmp/root-pass-sql | mysql --connect-expired-password -uroot -p"${DEFAULT_PASSWORD}" &>>$LOG
 fi
+
+PRINT "Uninstall Validate Plugin Password"
+echo "show plugins" | mysql -uroot -p${ROBOSHOP_MYSQL_PASSWORD} | grep validate_password &>>$LOG
+if [ $? -eq 0 ]; then
+  echo "uninstall plugin validate_password;" | mysql -uroot -p${ROBOSHOP_MYSQL_PASSWORD} &>>$LOG
+fi
+STAT $?
+
+APP_LOC=/tmp
+CONTENT=mysql-main
+DOWNLOAD_APP_CODE
+
+cd mysql-main &>>$LOG
+
+PRINT "load Shipping Schema"
+mysql -uroot -p${ROBOSHOP_MYSQL_PASSWORD} <shipping.sql &>>$LOG
+STAT $?

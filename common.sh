@@ -17,18 +17,50 @@ LOG=/tmp/$COMPONENT.log
 rm -f $LOG
 
 DOWNLOAD_APP_CODE(){
+
+    if [ ! -z "$APP_USER"]; then
+      PRINT "Adding Application User"
+      id roboshop &>>$LOG
+      if [ $? -ne 0 ]; then
+        useradd roboshop &>>$LOG
+      fi
+      STAT $?
+    fi
+
     PRINT "Download App Content"
     curl -s -L -o /tmp/${COMPONENT}.zip "https://github.com/roboshop-devops-project/${COMPONENT}/archive/main.zip" &>>$LOG
     STAT $?
 
     PRINT "Remove Previous Version of App"
     cd $APP_LOC &>>$LOG
-    rm -rf ${COMPONENT} &>>$LOG
+    rm -rf $CONTENT &>>$LOG
     STAT $?
 
     PRINT "Extracting App Content"
     unzip -o /tmp/${COMPONENT}.zip &>>$LOG
     STAT $?
+}
+
+SYSTEMD_SETUP(){
+  PRINT "Configure Endpoints for SystemD configuration"
+  sed -i -e 's/REDIS_ENDPOINT/redis.devopsb69.online/' -e 's/CATALOGUE_ENDPOINT/catalogue.devopsb69.online/' /home/roboshop/${COMPONENT}/systemd.service
+  STAT $?
+
+  PRINT "Setup SystemD Properties"
+  mv /home/roboshop/${COMPONENT}/systemd.service /etc/systemd/system/${COMPONENT}.service
+  STAT $?
+
+  PRINT "Reload SustemD"
+  systemctl daemon-reload &>>$LOG
+  STAT $?
+
+  PRINT "Restart ${COMPONENT}"
+  systemctl restart ${COMPONENT} &>>$LOG
+  STAT $?
+
+  PRINT "Enable ${COMPONENT} Service"
+  systemctl enable ${COMPONENT} &>>$LOG
+  STAT $?
 }
 
 NODEJS() {
@@ -58,23 +90,23 @@ NODEJS() {
   npm install &>>$LOG
   STAT $?
 
-  PRINT "Configure Endpoints for SystemD configuration"
-  sed -i -e 's/REDIS_ENDPOINT/redis.devopsb69.online/' -e 's/CATALOGUE_ENDPOINT/catalogue.devopsb69.online/' /home/roboshop/${COMPONENT}/systemd.service
+  SYSTEMD_SETUP
+}
+
+JAVA(){
+  APP_LOC=/home/roboshop
+  CONTENT=$COMPONENT
+  APP_USER=roboshop
+
+  PRINT "Install Maven"
+  yum install maven -y &>>$LOG
   STAT $?
 
-  PRINT "Setup SystemD Properties"
-  mv /home/roboshop/${COMPONENT}/systemd.service /etc/systemd/system/${COMPONENT}.service
+  DOWNLOAD_APP_CODE
+
+  PRINT "Download Maven Dependencies"
+  mvn clean package &>>$LOG && mv target/${COMPONENT}-1.0.jar ${COMPONENT}.jar &>>$LOG
   STAT $?
 
-  PRINT "Reload SustemD"
-  systemctl daemon-reload &>>$LOG
-  STAT $?
-
-  PRINT "Restart ${COMPONENT}"
-  systemctl restart ${COMPONENT} &>>$LOG
-  STAT $?
-
-  PRINT "Enable ${COMPONENT} Service"
-  systemctl enable ${COMPONENT} &>>$LOG
-  STAT $?
+  SYSTEMD_SETUP
 }
