@@ -43,7 +43,7 @@ DOWNLOAD_APP_CODE(){
 
 SYSTEMD_SETUP(){
   PRINT "Configure Endpoints for SystemD configuration"
-  sed -i -e 's/REDIS_ENDPOINT/redis.devopsb69.online/' -e 's/CATALOGUE_ENDPOINT/catalogue.devopsb69.online/' /home/roboshop/${COMPONENT}/systemd.service
+  sed -i -e 's/MONGO_DNSNAME/dev-mongodb.devopsb69.online/' -e 's/REDIS_ENDPOINT/dev-redis.devopsb69.online/' -e 's/CATALOGUE_ENDPOINT/dev-catalogue.devopsb69.online/' -e 's/MONGO_ENDPOINT/dev-mongodb.devopsb69.online/' -e 's/CARTENDPOINT/dev-cart.devopsb69.online/' -e 's/DBHOST/dev-mysql.devopsb69.online/' -e 's/AMQPHOST/dev-rabbitmq.devopsb69.online/' -e 's/CARTHOST/dev-cart.devopsb69.online/' -e 's/USERHOST/dev-user.devopsb69.online/' /home/roboshop/${COMPONENT}/systemd.service
   STAT $?
 
   PRINT "Setup SystemD Properties"
