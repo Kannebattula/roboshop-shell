@@ -104,9 +104,37 @@ JAVA(){
 
   DOWNLOAD_APP_CODE
 
+  mv ${COMPONENT}-main ${COMPONENT}
+  cd ${COMPONENT}
+
   PRINT "Download Maven Dependencies"
   mvn clean package &>>$LOG && mv target/${COMPONENT}-1.0.jar ${COMPONENT}.jar &>>$LOG
   STAT $?
 
+  SYSTEMD_SETUP
+}
+
+PYTHON(){
+  APP_LOC=/home/roboshop
+  CONTENT=$COMPONENT
+  APP_USER=roboshop
+
+  PRINT "Install Maven"
+  yum install python36 gcc python3-devel -y &>>$LOG
+  STAT $?
+
+  DOWNLOAD_APP_CODE
+  mv ${COMPONENT}-main ${COMPONENT}
+  cd ${COMPONENT}
+
+  PRINT "Install Python Dependencies"
+  pip3 install -r requirements.txt &>>$LOG
+  STAT $?
+
+  USER_ID=$(id -u roboshop)
+  GROUP_ID=$(id -g roboshop)
+  sed -i -e "/uid/ c uid = ${USER_ID}" -e "/uid/ c uid = ${GROUP_ID}" ${COMPONENT}.ini
+#  sed -e '/uid/ c uid = 1001' payment.ini
+#  sed -e '/uid/ c uid = 1001' payment.ini
   SYSTEMD_SETUP
 }
